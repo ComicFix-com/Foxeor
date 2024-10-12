@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload, Search, Lock } from 'lucide-react';
-import ImageUploader from '../components/ImageUploader';
+import { Search, Lock } from 'lucide-react';
+import FileUploader from '../components/FileUploader';
 
 const Index = () => {
   const handleSearch = () => {
@@ -21,7 +21,7 @@ const Index = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
             <div className="flex items-center mb-4 sm:mb-0">
-              <ImageUploader />
+              <FileUploader />
             </div>
             <div className="flex items-center w-full sm:w-auto mt-4 sm:mt-0">
               <Input type="text" placeholder="Search files..." className="mr-2" />
