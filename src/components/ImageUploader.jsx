@@ -4,6 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const API_KEY = 'c831986e7b6870185e1dac3788461d3e';
 
@@ -28,9 +36,10 @@ const uploadImage = async (file) => {
   }
 };
 
-const ImageUploader = () => {
+const ImageUploader = ({ onDonate }) => {
   const [file, setFile] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
+  const [showDonatePrompt, setShowDonatePrompt] = useState(false);
 
   const { refetch: uploadImageMutation, isLoading } = useQuery({
     queryKey: ['uploadImage', file],
@@ -39,6 +48,7 @@ const ImageUploader = () => {
     onSuccess: (data) => {
       setImageUrl(data.url);
       toast.success('Image uploaded successfully!');
+      setShowDonatePrompt(true);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -60,6 +70,11 @@ const ImageUploader = () => {
   const handleCopyLink = () => {
     navigator.clipboard.writeText(imageUrl);
     toast.success('Link copied to clipboard!');
+  };
+
+  const handleDonate = () => {
+    onDonate();
+    setShowDonatePrompt(false);
   };
 
   return (
@@ -104,6 +119,24 @@ const ImageUploader = () => {
           <img src={imageUrl} alt="Uploaded" className="mt-4 w-full rounded-lg shadow-md" />
         </div>
       )}
+      <Dialog open={showDonatePrompt} onOpenChange={setShowDonatePrompt}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Support Foxeor</DialogTitle>
+            <DialogDescription>
+              Thank you for using Foxeor! Would you like to support us with a one-time donation of ₹89?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowDonatePrompt(false)}>
+              Maybe Later
+            </Button>
+            <Button onClick={handleDonate}>
+              Donate ₹89
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
