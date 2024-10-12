@@ -10,7 +10,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 const API_KEY = 'c831986e7b6870185e1dac3788461d3e';
@@ -102,7 +101,7 @@ const ImageUploader = ({ onDonate }) => {
       <Button
         onClick={handleUpload}
         disabled={isLoading || !file}
-        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105"
+        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out"
       >
         {isLoading ? 'Uploading...' : 'Upload Image'}
         <Upload className="ml-2 h-4 w-4" />
