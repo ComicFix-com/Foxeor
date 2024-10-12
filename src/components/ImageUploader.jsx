@@ -1,56 +1,33 @@
 import React, { useState } from 'react';
-import { Upload, Link, Image as ImageIcon } from 'lucide-react';
+import { Upload, Search, File } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
-const API_KEY = 'c831986e7b6870185e1dac3788461d3e';
-
-const uploadImage = async (file) => {
-  const formData = new FormData();
-  formData.append('image', file);
-
-  try {
-    const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to upload image');
-    }
-
-    const data = await response.json();
-    return data.data;
-  } catch (error) {
-    throw new Error('Failed to upload image: ' + error.message);
-  }
+const uploadFile = async (file) => {
+  // TODO: Implement actual file upload with encryption
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ url: URL.createObjectURL(file), name: file.name });
+    }, 1000);
+  });
 };
 
-const ImageUploader = ({ onDonate }) => {
+const ImageUploader = () => {
   const [file, setFile] = useState(null);
-  const [imageUrl, setImageUrl] = useState('');
-  const [showDonatePrompt, setShowDonatePrompt] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
-  const { refetch: uploadImageMutation, isLoading } = useQuery({
-    queryKey: ['uploadImage', file],
-    queryFn: () => uploadImage(file),
+  const { refetch: uploadFileMutation, isLoading } = useQuery({
+    queryKey: ['uploadFile', file],
+    queryFn: () => uploadFile(file),
     enabled: false,
     onSuccess: (data) => {
-      setImageUrl(data.url);
-      toast.success('Image uploaded successfully!');
-      setShowDonatePrompt(true);
+      setUploadedFiles([...uploadedFiles, data]);
+      toast.success('File uploaded successfully!');
     },
     onError: (error) => {
-      toast.error(error.message);
+      toast.error('Failed to upload file: ' + error.message);
     },
   });
 
@@ -60,20 +37,10 @@ const ImageUploader = ({ onDonate }) => {
 
   const handleUpload = () => {
     if (file) {
-      uploadImageMutation();
+      uploadFileMutation();
     } else {
-      toast.error('Please select an image to upload');
+      toast.error('Please select a file to upload');
     }
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(imageUrl);
-    toast.success('Link copied to clipboard!');
-  };
-
-  const handleDonate = () => {
-    onDonate();
-    setShowDonatePrompt(false);
   };
 
   return (
@@ -82,7 +49,6 @@ const ImageUploader = ({ onDonate }) => {
         <Input
           type="file"
           onChange={handleFileChange}
-          accept="image/*"
           className="hidden"
           id="file-upload"
         />
@@ -91,9 +57,9 @@ const ImageUploader = ({ onDonate }) => {
           className="flex items-center justify-center w-full h-24 sm:h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none"
         >
           <span className="flex items-center space-x-2">
-            <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+            <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
             <span className="font-medium text-sm sm:text-base text-gray-600">
-              {file ? file.name : 'Tap to upload an image'}
+              {file ? file.name : 'Click or drag file to upload'}
             </span>
           </span>
         </label>
@@ -103,39 +69,20 @@ const ImageUploader = ({ onDonate }) => {
         disabled={isLoading || !file}
         className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out"
       >
-        {isLoading ? 'Uploading...' : 'Upload Image'}
+        {isLoading ? 'Uploading...' : 'Upload File'}
         <Upload className="ml-2 h-4 w-4" />
       </Button>
-      {imageUrl && (
+      {uploadedFiles.length > 0 && (
         <div className="mt-4 space-y-3">
-          <p className="font-semibold text-gray-700">Image Link:</p>
-          <div className="flex items-center space-x-2">
-            <Input value={imageUrl} readOnly className="flex-grow bg-gray-50 text-sm" />
-            <Button onClick={handleCopyLink} variant="outline" size="icon">
-              <Link className="h-4 w-4" />
-            </Button>
-          </div>
-          <img src={imageUrl} alt="Uploaded" className="mt-3 w-full rounded-lg shadow-md" />
+          <h3 className="font-semibold text-gray-700">Uploaded Files:</h3>
+          {uploadedFiles.map((file, index) => (
+            <div key={index} className="flex items-center space-x-2 bg-gray-50 p-2 rounded">
+              <File className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-700">{file.name}</span>
+            </div>
+          ))}
         </div>
       )}
-      <Dialog open={showDonatePrompt} onOpenChange={setShowDonatePrompt}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Support Foxeor</DialogTitle>
-            <DialogDescription>
-              Thank you for using Foxeor! Would you like to support us with a one-time donation of ₹89?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end space-x-2 mt-4">
-            <Button variant="outline" onClick={() => setShowDonatePrompt(false)}>
-              Maybe Later
-            </Button>
-            <Button onClick={handleDonate}>
-              Donate ₹89
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
