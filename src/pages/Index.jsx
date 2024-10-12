@@ -20,7 +20,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-gray-100">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">FoxeorSecureCloud</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Foxeor</h1>
         </div>
       </header>
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -58,7 +58,7 @@ const Index = () => {
       </main>
       <footer className="bg-white border-t">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <p className="text-sm text-gray-500">© 2024 FoxeorSecureCloud. All rights reserved.</p>
+          <p className="text-sm text-gray-500">© 2024 Foxeor. All rights reserved.</p>
           <div className="flex items-center">
             <Lock className="h-4 w-4 mr-1 text-green-500" />
             <span className="text-sm text-gray-700">End-to-End Encrypted</span>

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 
 const API_KEY = 'c831986e7b6870185e1dac3788461d3e';
 
@@ -56,6 +57,7 @@ const uploadFile = async (file) => {
 const FileUploader = ({ onFileUploaded }) => {
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState('');
+  const [showDonateDialog, setShowDonateDialog] = useState(false);
 
   const { refetch: uploadFileMutation, isLoading } = useQuery({
     queryKey: ['uploadFile', file],
@@ -65,6 +67,7 @@ const FileUploader = ({ onFileUploaded }) => {
       setFileUrl(data.url);
       toast.success('File uploaded successfully!');
       onFileUploaded({ name: file.name, url: data.url });
+      setShowDonateDialog(true);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -86,6 +89,11 @@ const FileUploader = ({ onFileUploaded }) => {
   const handleCopyLink = () => {
     navigator.clipboard.writeText(fileUrl);
     toast.success('Link copied to clipboard!');
+  };
+
+  const handleDonate = () => {
+    window.location.href = 'upi://pay?pa=adnanmuhammad4393@okicici&pn=Adnan+Muhammad&am=89&tn=donating for Foxeor';
+    setShowDonateDialog(false);
   };
 
   return (
@@ -131,6 +139,24 @@ const FileUploader = ({ onFileUploaded }) => {
           )}
         </div>
       )}
+      <Dialog open={showDonateDialog} onOpenChange={setShowDonateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Support Foxeor</DialogTitle>
+            <DialogDescription>
+              Thank you for using Foxeor! Would you like to support our app with a one-time donation of 89 Rs?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setShowDonateDialog(false)} variant="outline">
+              Maybe Later
+            </Button>
+            <Button onClick={handleDonate} className="bg-green-500 hover:bg-green-600">
+              Donate 89 Rs
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
