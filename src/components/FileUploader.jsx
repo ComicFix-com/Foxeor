@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Link, Image as ImageIcon } from 'lucide-react';
+import { Upload, Link, File } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,9 +7,34 @@ import { toast } from 'sonner';
 
 const API_KEY = 'c831986e7b6870185e1dac3788461d3e';
 
-const uploadImage = async (file) => {
+const encryptData = async (data) => {
+  const encoder = new TextEncoder();
+  const encodedData = encoder.encode(data);
+  const key = await window.crypto.subtle.generateKey(
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt', 'decrypt']
+  );
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const encryptedData = await window.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: iv },
+    key,
+    encodedData
+  );
+  return { encryptedData, key, iv };
+};
+
+const uploadFile = async (file) => {
   const formData = new FormData();
-  formData.append('image', file);
+  
+  if (file.type.startsWith('image/')) {
+    formData.append('image', file);
+  } else {
+    const fileContent = await file.text();
+    const { encryptedData, key, iv } = await encryptData(fileContent);
+    const encryptedFile = new Blob([encryptedData], { type: 'application/octet-stream' });
+    formData.append('image', encryptedFile, file.name + '.encrypted');
+  }
 
   try {
     const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
@@ -18,27 +43,28 @@ const uploadImage = async (file) => {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to upload image');
+      throw new Error('Failed to upload file');
     }
 
     const data = await response.json();
     return data.data;
   } catch (error) {
-    throw new Error('Failed to upload image: ' + error.message);
+    throw new Error('Failed to upload file: ' + error.message);
   }
 };
 
-const ImageUploader = () => {
+const FileUploader = ({ onFileUploaded }) => {
   const [file, setFile] = useState(null);
-  const [imageUrl, setImageUrl] = useState('');
+  const [fileUrl, setFileUrl] = useState('');
 
-  const { refetch: uploadImageMutation, isLoading } = useQuery({
-    queryKey: ['uploadImage', file],
-    queryFn: () => uploadImage(file),
+  const { refetch: uploadFileMutation, isLoading } = useQuery({
+    queryKey: ['uploadFile', file],
+    queryFn: () => uploadFile(file),
     enabled: false,
     onSuccess: (data) => {
-      setImageUrl(data.url);
-      toast.success('Image uploaded successfully!');
+      setFileUrl(data.url);
+      toast.success('File uploaded successfully!');
+      onFileUploaded({ name: file.name, url: data.url });
     },
     onError: (error) => {
       toast.error(error.message);
@@ -51,14 +77,14 @@ const ImageUploader = () => {
 
   const handleUpload = () => {
     if (file) {
-      uploadImageMutation();
+      uploadFileMutation();
     } else {
-      toast.error('Please select an image to upload');
+      toast.error('Please select a file to upload');
     }
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(imageUrl);
+    navigator.clipboard.writeText(fileUrl);
     toast.success('Link copied to clipboard!');
   };
 
@@ -68,7 +94,6 @@ const ImageUploader = () => {
         <Input
           type="file"
           onChange={handleFileChange}
-          accept="image/*"
           className="hidden"
           id="file-upload"
         />
@@ -77,9 +102,9 @@ const ImageUploader = () => {
           className="flex items-center justify-center w-full h-24 sm:h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none"
         >
           <span className="flex items-center space-x-2">
-            <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+            <File className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
             <span className="font-medium text-sm sm:text-base text-gray-600">
-              {file ? file.name : 'Click or drag image to upload'}
+              {file ? file.name : 'Click or drag file to upload'}
             </span>
           </span>
         </label>
@@ -89,23 +114,25 @@ const ImageUploader = () => {
         disabled={isLoading || !file}
         className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out"
       >
-        {isLoading ? 'Uploading...' : 'Upload Image'}
+        {isLoading ? 'Uploading...' : 'Upload File'}
         <Upload className="ml-2 h-4 w-4" />
       </Button>
-      {imageUrl && (
+      {fileUrl && (
         <div className="mt-4 space-y-3">
-          <p className="font-semibold text-gray-700">Image Link:</p>
+          <p className="font-semibold text-gray-700">File Link:</p>
           <div className="flex items-center space-x-2">
-            <Input value={imageUrl} readOnly className="flex-grow bg-gray-50 text-sm" />
+            <Input value={fileUrl} readOnly className="flex-grow bg-gray-50 text-sm" />
             <Button onClick={handleCopyLink} variant="outline" size="icon">
               <Link className="h-4 w-4" />
             </Button>
           </div>
-          <img src={imageUrl} alt="Uploaded" className="mt-3 w-full rounded-lg shadow-md" />
+          {file && file.type.startsWith('image/') && (
+            <img src={fileUrl} alt="Uploaded" className="mt-3 w-full rounded-lg shadow-md" />
+          )}
         </div>
       )}
     </div>
   );
 };
 
-export default ImageUploader;
+export default FileUploader;
