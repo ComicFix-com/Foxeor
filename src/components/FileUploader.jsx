@@ -50,7 +50,7 @@ const uploadFile = async (file) => {
   return data.data;
 };
 
-const FileUploader = ({ onFileUploaded }) => {
+const FileUploader = ({ onFileUploaded, onFileUploadStart }) => {
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState('');
   const [showDonateDialog, setShowDonateDialog] = useState(false);
@@ -83,6 +83,7 @@ const FileUploader = ({ onFileUploaded }) => {
 
   const handleUpload = () => {
     if (file) {
+      onFileUploadStart(file.name);
       uploadFileMutation();
     } else {
       toast.error('Please select a file to upload');
