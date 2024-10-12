@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Link, File } from 'lucide-react';
+import { Upload, Link, File, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
