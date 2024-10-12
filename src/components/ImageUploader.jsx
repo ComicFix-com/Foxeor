@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Upload, Link } from 'lucide-react';
+import { Upload, Link, Image as ImageIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
-const API_KEY = 'c831986e7b6870185e1dac3788461d3e'; // ImgBB API key
+const API_KEY = 'c831986e7b6870185e1dac3788461d3e';
 
 const uploadImage = async (file) => {
   const formData = new FormData();
@@ -63,33 +63,45 @@ const ImageUploader = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-      <div className="mb-4">
+    <div className="space-y-6">
+      <div className="relative">
         <Input
           type="file"
           onChange={handleFileChange}
           accept="image/*"
-          className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+          className="hidden"
+          id="file-upload"
         />
+        <label
+          htmlFor="file-upload"
+          className="flex items-center justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none"
+        >
+          <span className="flex items-center space-x-2">
+            <ImageIcon className="w-6 h-6 text-gray-600" />
+            <span className="font-medium text-gray-600">
+              {file ? file.name : 'Drop files to Attach, or browse'}
+            </span>
+          </span>
+        </label>
       </div>
       <Button
         onClick={handleUpload}
         disabled={isLoading || !file}
-        className="w-full mb-4"
+        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105"
       >
         {isLoading ? 'Uploading...' : 'Upload Image'}
         <Upload className="ml-2 h-4 w-4" />
       </Button>
       {imageUrl && (
-        <div className="mt-4">
-          <p className="mb-2 font-semibold">Image Link:</p>
-          <div className="flex items-center">
-            <Input value={imageUrl} readOnly className="flex-grow mr-2" />
-            <Button onClick={handleCopyLink} size="icon">
+        <div className="mt-6 space-y-4">
+          <p className="font-semibold text-gray-700">Image Link:</p>
+          <div className="flex items-center space-x-2">
+            <Input value={imageUrl} readOnly className="flex-grow bg-gray-50" />
+            <Button onClick={handleCopyLink} variant="outline" size="icon">
               <Link className="h-4 w-4" />
             </Button>
           </div>
-          <img src={imageUrl} alt="Uploaded" className="mt-4 w-full rounded-lg" />
+          <img src={imageUrl} alt="Uploaded" className="mt-4 w-full rounded-lg shadow-md" />
         </div>
       )}
     </div>
