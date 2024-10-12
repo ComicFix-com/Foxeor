@@ -4,23 +4,29 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import imgbbUploader from 'imgbb-uploader';
 
 const API_KEY = 'YOUR_IMGBB_API_KEY'; // Replace with your actual imgBB API key
 
 const uploadImage = async (file) => {
-  const formData = new FormData();
-  formData.append('image', file);
+  try {
+    const base64string = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = (error) => reject(error);
+    });
 
-  const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
-    method: 'POST',
-    body: formData,
-  });
+    const response = await imgbbUploader({
+      apiKey: API_KEY,
+      base64string,
+      name: file.name,
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to upload image');
+    return response;
+  } catch (error) {
+    throw new Error('Failed to upload image: ' + error.message);
   }
-
-  return response.json();
 };
 
 const ImageUploader = () => {
@@ -32,11 +38,11 @@ const ImageUploader = () => {
     queryFn: () => uploadImage(file),
     enabled: false,
     onSuccess: (data) => {
-      setImageUrl(data.data.url);
+      setImageUrl(data.url);
       toast.success('Image uploaded successfully!');
     },
     onError: (error) => {
-      toast.error('Failed to upload image: ' + error.message);
+      toast.error(error.message);
     },
   });
 
