@@ -37,21 +37,17 @@ const uploadFile = async (file) => {
     formData.append('image', encryptedFile, file.name + '.encrypted');
   }
 
-  try {
-    const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
-      method: 'POST',
-      body: formData,
-    });
+  const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
+    method: 'POST',
+    body: formData,
+  });
 
-    if (!response.ok) {
-      throw new Error('Failed to upload file');
-    }
-
-    const data = await response.json();
-    return data.data;
-  } catch (error) {
-    throw new Error('Failed to upload file: ' + error.message);
+  if (!response.ok) {
+    throw new Error('Failed to upload file');
   }
+
+  const data = await response.json();
+  return data.data;
 };
 
 const FileUploader = ({ onFileUploaded }) => {
@@ -70,12 +66,19 @@ const FileUploader = ({ onFileUploaded }) => {
       setShowDonateDialog(true);
     },
     onError: (error) => {
-      toast.error(error.message);
+      toast.error(`Upload failed: ${error.message}`);
     },
   });
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      if (selectedFile.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error('File size exceeds 10MB limit');
+        return;
+      }
+      setFile(selectedFile);
+    }
   };
 
   const handleUpload = () => {
@@ -104,6 +107,7 @@ const FileUploader = ({ onFileUploaded }) => {
           onChange={handleFileChange}
           className="hidden"
           id="file-upload"
+          accept="image/*,.txt,.pdf,.doc,.docx"
         />
         <label
           htmlFor="file-upload"
@@ -112,7 +116,7 @@ const FileUploader = ({ onFileUploaded }) => {
           <span className="flex items-center space-x-2">
             <File className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
             <span className="font-medium text-sm sm:text-base text-gray-600">
-              {file ? file.name : 'Click or drag file to upload'}
+              {file ? file.name : 'Click or drag file to upload (max 10MB)'}
             </span>
           </span>
         </label>

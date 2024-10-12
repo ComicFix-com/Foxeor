@@ -6,15 +6,20 @@ import FileUploader from '../components/FileUploader';
 
 const Index = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearch = () => {
     // TODO: Implement file search functionality
-    console.log('Search triggered');
+    console.log('Searching for:', searchTerm);
   };
 
   const handleFileUploaded = (fileInfo) => {
     setUploadedFiles(prevFiles => [...prevFiles, fileInfo]);
   };
+
+  const filteredFiles = uploadedFiles.filter(file => 
+    file.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -25,22 +30,26 @@ const Index = () => {
       </header>
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-            <div className="flex items-center mb-4 sm:mb-0">
-              <FileUploader onFileUploaded={handleFileUploaded} />
-            </div>
-            <div className="flex items-center w-full sm:w-auto mt-4 sm:mt-0">
-              <Input type="text" placeholder="Search files..." className="mr-2" />
-              <Button onClick={handleSearch}>
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="mb-6">
+            <FileUploader onFileUploaded={handleFileUploaded} />
+          </div>
+          <div className="flex items-center w-full mb-6">
+            <Input 
+              type="text" 
+              placeholder="Search files..." 
+              className="mr-2"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button onClick={handleSearch}>
+              <Search className="h-4 w-4" />
+            </Button>
           </div>
           <div className="border-t pt-6">
             <h2 className="text-lg font-semibold mb-4">Your Secure Files</h2>
-            {uploadedFiles.length > 0 ? (
+            {filteredFiles.length > 0 ? (
               <ul className="space-y-2">
-                {uploadedFiles.map((file, index) => (
+                {filteredFiles.map((file, index) => (
                   <li key={index} className="flex items-center space-x-2">
                     <File className="h-4 w-4 text-gray-500" />
                     <span className="text-sm text-gray-700">{file.name}</span>
@@ -50,7 +59,7 @@ const Index = () => {
               </ul>
             ) : (
               <p className="text-gray-500 text-center py-8">
-                Your files will appear here. They are encrypted and secure.
+                {uploadedFiles.length > 0 ? 'No matching files found.' : 'Your files will appear here. They are encrypted and secure.'}
               </p>
             )}
           </div>
