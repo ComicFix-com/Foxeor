@@ -2,13 +2,9 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Upload, Search, Lock } from 'lucide-react';
+import ImageUploader from '../components/ImageUploader';
 
 const Index = () => {
-  const handleUpload = () => {
-    // TODO: Implement secure file upload logic
-    console.log('File upload triggered');
-  };
-
   const handleSearch = () => {
     // TODO: Implement file search functionality
     console.log('Search triggered');
@@ -25,16 +21,9 @@ const Index = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
             <div className="flex items-center mb-4 sm:mb-0">
-              <Input type="file" className="hidden" id="file-upload" onChange={handleUpload} />
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <Button variant="outline" className="mr-2">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload Files
-                </Button>
-              </label>
-              <p className="text-sm text-gray-500">Drag & drop files here</p>
+              <ImageUploader />
             </div>
-            <div className="flex items-center w-full sm:w-auto">
+            <div className="flex items-center w-full sm:w-auto mt-4 sm:mt-0">
               <Input type="text" placeholder="Search files..." className="mr-2" />
               <Button onClick={handleSearch}>
                 <Search className="h-4 w-4" />
